@@ -16,43 +16,83 @@ public class Orion {
         boolean running = true;
         Scanner scanner = new Scanner(System.in);
         while (running) {
-            System.out.print("\n> ");
-            String input = scanner.nextLine();
-            String[] parts = input.split(" ", 2);
-            String command = parts[0];
-            String arguments = parts.length == 2 ? parts[1] : null;
-            switch (command) {
-                case "list":
-                    listTasks();
-                    break;
+            try {
+                System.out.print("\n> ");
+                String input = scanner.nextLine();
+                String[] parts = input.split(" ", 2);
+                String command = parts[0];
+                String arguments = parts.length == 2 ? parts[1] : null;
+                switch (command) {
+                    case "list":
+                        listTasks();
+                        break;
 
-                case "bye":
-                    bye();
-                    running = false;
-                    break;
+                    case "bye":
+                        bye();
+                        running = false;
+                        break;
 
-                case "mark":
-                    markTask(Integer.parseInt(arguments) - 1, true);
-                    break;
+                    case "mark":
+                        markTask(Integer.parseInt(arguments) - 1, true);
+                        break;
 
-                case "unmark":
-                    markTask(Integer.parseInt(arguments) - 1, false);
-                    break;
+                    case "unmark":
+                        markTask(Integer.parseInt(arguments) - 1, false);
+                        break;
 
-                case "todo":
-                    addTask(new Todo(arguments));
-                    break;
+                    case "todo":
+                        if (arguments == null) {
+                            throw new OrionException("You must provide a description for the task!");
+                        }
+                        addTask(new Todo(arguments));
+                        break;
 
-                case "deadline":
-                    String[] deadlineParts = arguments.split(" /by ");
-                    addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
-                    break;
+                    case "deadline":
+                        if (arguments == null) {
+                            throw new OrionException("You must provide a description and deadline for the task!");
+                        }
+                        String[] deadlineParts = arguments.split(" /by ");
+                        if (deadlineParts.length == 1) {
+                            throw new OrionException("You must provide the deadline of the task in " +
+                                    "this format:\n" +
+                                    "\"deadline (description) /by (deadline)\"");
+                        }
+                        addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
+                        break;
 
-                case "event":
-                    String[] eventParts = arguments.split(" /from ");
-                    String[] timeParts = eventParts[1].split(" /to ");
-                    addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
-                    break;
+                    case "event":
+                        if (arguments == null) {
+                            throw new OrionException("You must provide a description and start/end for the event!");
+                        }
+                        String[] eventParts = arguments.split(" /from ");
+                        if (eventParts.length == 1) {
+                            throw new OrionException("You must specify the details of the event in " +
+                                    "this format:\n" +
+                                    "\"event (description) /from (start) /to (end)\"");
+                        }
+                        String[] timeParts = eventParts[1].split(" /to ");
+                        if (timeParts.length == 1) {
+                            throw new OrionException("You must specify the details of the event in " +
+                                    "this format:\n" +
+                                    "\"event (description) /from (start) /to (end)\"");
+                        }
+                        addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
+                        break;
+
+                    default:
+                        throw new OrionException("That is not a valid command!");
+                }
+            } catch (OrionException e) {
+                System.out.println(LINE);
+                System.out.println(e.getMessage());
+                System.out.println(LINE);
+            } catch (NumberFormatException e) {
+                System.out.println(LINE);
+                System.out.println("Could not parse the task number that you want to mark/unmark!");
+                System.out.println(LINE);
+            } catch (IndexOutOfBoundsException e) {
+                System.out.println("You do not have a task with the number you provided!");
+                System.out.println(LINE);
             }
         }
     }
