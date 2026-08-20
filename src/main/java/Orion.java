@@ -18,8 +18,9 @@ public class Orion {
         while (running) {
             System.out.print("\n> ");
             String input = scanner.nextLine();
-            String[] parts = input.split(" ");
+            String[] parts = input.split(" ", 2);
             String command = parts[0];
+            String arguments = parts.length == 2 ? parts[1] : null;
             switch (command) {
                 case "list":
                     listTasks();
@@ -31,15 +32,26 @@ public class Orion {
                     break;
 
                 case "mark":
-                    markTask(Integer.parseInt(parts[1]) - 1, true);
+                    markTask(Integer.parseInt(arguments) - 1, true);
                     break;
 
                 case "unmark":
-                    markTask(Integer.parseInt(parts[1]) - 1, false);
+                    markTask(Integer.parseInt(arguments) - 1, false);
                     break;
 
-                default:
-                    addTask(input);
+                case "todo":
+                    addTask(new Todo(arguments));
+                    break;
+
+                case "deadline":
+                    String[] deadlineParts = arguments.split(" /by ");
+                    addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
+                    break;
+
+                case "event":
+                    String[] eventParts = arguments.split(" /from ");
+                    String[] timeParts = eventParts[1].split(" /to ");
+                    addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
                     break;
             }
         }
@@ -59,10 +71,12 @@ public class Orion {
         System.out.println(LINE);
     }
 
-    private static void addTask(String taskDescription) {
+    private static void addTask(Task task) {
         System.out.println(LINE);
-        tasks.add(new Task(taskDescription));
-        System.out.println("added: " + taskDescription);
+        tasks.add(task);
+        System.out.println("Got it. I've added this task:");
+        System.out.println("  " + task);
+        System.out.println("You now have " + tasks.size() + " task(s) in the list.");
         System.out.println(LINE);
     }
 
