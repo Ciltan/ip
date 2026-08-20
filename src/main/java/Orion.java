@@ -20,34 +20,34 @@ public class Orion {
                 System.out.print("\n> ");
                 String input = scanner.nextLine();
                 String[] parts = input.split(" ", 2);
-                String command = parts[0];
+                Command command = Command.valueOf(parts[0].toUpperCase());
                 String arguments = parts.length == 2 ? parts[1] : null;
                 switch (command) {
-                    case "list":
+                    case LIST:
                         listTasks();
                         break;
 
-                    case "bye":
+                    case BYE:
                         bye();
                         running = false;
                         break;
 
-                    case "mark":
+                    case MARK:
                         markTask(Integer.parseInt(arguments) - 1, true);
                         break;
 
-                    case "unmark":
+                    case UNMARK:
                         markTask(Integer.parseInt(arguments) - 1, false);
                         break;
 
-                    case "todo":
+                    case TODO:
                         if (arguments == null) {
                             throw new OrionException("You must provide a description for the task!");
                         }
                         addTask(new Todo(arguments));
                         break;
 
-                    case "deadline":
+                    case DEADLINE:
                         if (arguments == null) {
                             throw new OrionException("You must provide a description and deadline for the task!");
                         }
@@ -60,7 +60,7 @@ public class Orion {
                         addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
                         break;
 
-                    case "event":
+                    case EVENT:
                         if (arguments == null) {
                             throw new OrionException("You must provide a description and start/end for the event!");
                         }
@@ -79,12 +79,9 @@ public class Orion {
                         addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
                         break;
 
-                    case "delete":
+                    case DELETE:
                         deleteTask(Integer.parseInt(arguments) - 1);
                         break;
-
-                    default:
-                        throw new OrionException("That is not a valid command!");
                 }
             } catch (OrionException e) {
                 System.out.println(LINE);
@@ -96,6 +93,10 @@ public class Orion {
                 System.out.println(LINE);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("You do not have a task with the number you provided!");
+                System.out.println(LINE);
+            } catch (IllegalArgumentException e) {
+                System.out.println(LINE);
+                System.out.println("That is not a valid command!");
                 System.out.println(LINE);
             }
         }
