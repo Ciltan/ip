@@ -79,6 +79,10 @@ public class Orion {
                         addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
                         break;
 
+                    case "delete":
+                        deleteTask(Integer.parseInt(arguments) - 1);
+                        break;
+
                     default:
                         throw new OrionException("That is not a valid command!");
                 }
@@ -88,7 +92,7 @@ public class Orion {
                 System.out.println(LINE);
             } catch (NumberFormatException e) {
                 System.out.println(LINE);
-                System.out.println("Could not parse the task number that you want to mark/unmark!");
+                System.out.println("Could not parse the task number you provided!");
                 System.out.println(LINE);
             } catch (IndexOutOfBoundsException e) {
                 System.out.println("You do not have a task with the number you provided!");
@@ -139,6 +143,15 @@ public class Orion {
             System.out.println("OK, I've marked this task as not done yet:");
         }
         System.out.println("  " + task);
+        System.out.println(LINE);
+    }
+
+    private static void deleteTask(int index) {
+        System.out.println(LINE);
+        Task task = tasks.remove(index);
+        System.out.println("Got it. I've removed this task:");
+        System.out.println("  " + task);
+        System.out.println("You now have " + tasks.size() + " task(s) in the list.");
         System.out.println(LINE);
     }
 }
