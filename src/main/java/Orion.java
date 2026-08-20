@@ -9,7 +9,7 @@ public class Orion {
             + "\\____/_/  /_/\\____/_/ /_/\n";
     private static final String LINE = "____________________________________________________________";
 
-    private static List<String> tasks = new ArrayList<>();
+    private static List<Task> tasks = new ArrayList<>();
 
     public static void main(String[] args) {
         greet();
@@ -17,7 +17,9 @@ public class Orion {
         Scanner scanner = new Scanner(System.in);
         while (running) {
             System.out.print("\n> ");
-            String command = scanner.nextLine();
+            String input = scanner.nextLine();
+            String[] parts = input.split(" ");
+            String command = parts[0];
             switch (command) {
                 case "list":
                     listTasks();
@@ -28,8 +30,16 @@ public class Orion {
                     running = false;
                     break;
 
+                case "mark":
+                    markTask(Integer.parseInt(parts[1]) - 1, true);
+                    break;
+
+                case "unmark":
+                    markTask(Integer.parseInt(parts[1]) - 1, false);
+                    break;
+
                 default:
-                    addTask(command);
+                    addTask(input);
                     break;
             }
         }
@@ -49,18 +59,32 @@ public class Orion {
         System.out.println(LINE);
     }
 
-    private static void addTask(String task) {
+    private static void addTask(String taskDescription) {
         System.out.println(LINE);
-        tasks.add(task);
-        System.out.println("added: " + task);
+        tasks.add(new Task(taskDescription));
+        System.out.println("added: " + taskDescription);
         System.out.println(LINE);
     }
 
     private static void listTasks() {
         System.out.println(LINE);
+        System.out.println("Here are the tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println((i + 1) + ". " + tasks.get(i));
         }
+        System.out.println(LINE);
+    }
+
+    private static void markTask(int index, boolean isDone) {
+        System.out.println(LINE);
+        Task task = tasks.get(index);
+        task.setDone(isDone);
+        if (isDone) {
+            System.out.println("Nice! I've marked this task as done:");
+        } else {
+            System.out.println("OK, I've marked this task as not done yet:");
+        }
+        System.out.println("  " + task);
         System.out.println(LINE);
     }
 }
