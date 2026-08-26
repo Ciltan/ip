@@ -21,25 +21,34 @@ public class Storage {
             }
             Scanner scanner = new Scanner(file);
             while (scanner.hasNext()) {
-                String[] parts = scanner.nextLine().split(" \\| ");
-                String taskType = parts[0];
-                boolean isDone = parts[1].equals("1");
-                String description = parts[2];
-                switch (taskType) {
-                    case "T":
-                        tasks.add(new Todo(description, isDone));
-                        break;
+                String line = scanner.nextLine();
+                try {
+                    String[] parts = line.split(" \\| ");
+                    String taskType = parts[0];
+                    boolean isDone = parts[1].equals("1");
+                    String description = parts[2];
+                    switch (taskType) {
+                        case "T":
+                            tasks.add(new Todo(description, isDone));
+                            break;
 
-                    case "D":
-                        String deadline = parts[3];
-                        tasks.add(new Deadline(description, deadline, isDone));
-                        break;
+                        case "D":
+                            String deadline = parts[3];
+                            tasks.add(new Deadline(description, deadline, isDone));
+                            break;
 
-                    case "E":
-                        String start = parts[3];
-                        String end = parts[4];
-                        tasks.add(new Event(description, start, end, isDone));
-                        break;
+                        case "E":
+                            String start = parts[3];
+                            String end = parts[4];
+                            tasks.add(new Event(description, start, end, isDone));
+                            break;
+
+                        default:
+                            System.out.println("Unknown task type found in save file. Skipping line: " + line);
+                            break;
+                    }
+                } catch (Exception e) {
+                    System.out.println("Corrupted data found in save file. Skipping line:" + line);
                 }
             }
         } catch (IOException e) {
