@@ -1,3 +1,14 @@
+package orion.parser;
+
+import orion.exception.OrionException;
+import orion.storage.Storage;
+import orion.task.Deadline;
+import orion.task.Event;
+import orion.task.Task;
+import orion.task.TaskList;
+import orion.task.Todo;
+import orion.ui.Ui;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -18,7 +29,7 @@ public class Parser {
             String arguments = parts.length == 2 ? parts[1] : null;
 
             switch (command) {
-                case LIST:
+                case Command.LIST:
                     ui.showLine();
                     ui.showMessage("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.getSize(); i++) {
@@ -27,26 +38,26 @@ public class Parser {
                     ui.showLine();
                     break;
 
-                case BYE:
+                case Command.BYE:
                     ui.showGoodbye();
                     return false;
 
-                case MARK:
+                case Command.MARK:
                     markTask(Integer.parseInt(arguments) - 1, true, tasks, ui, storage);
                     break;
 
-                case UNMARK:
+                case Command.UNMARK:
                     markTask(Integer.parseInt(arguments) - 1, false, tasks, ui, storage);
                     break;
 
-                case TODO:
+                case Command.TODO:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description for the task!");
                     }
                     addTask(new Todo(arguments), tasks, ui, storage);
                     break;
 
-                case DEADLINE:
+                case Command.DEADLINE:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description and deadline!");
                     }
@@ -59,7 +70,7 @@ public class Parser {
                     addTask(new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1])), tasks, ui, storage);
                     break;
 
-                case EVENT:
+                case Command.EVENT:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description and start/end!");
                     }
@@ -78,7 +89,7 @@ public class Parser {
                     addTask(new Event(eventParts[0], parseDateTime(timeParts[0]), parseDateTime(timeParts[1])), tasks, ui, storage);
                     break;
 
-                case DELETE:
+                case Command.DELETE:
                     deleteTask(Integer.parseInt(arguments) - 1, tasks, ui, storage);
                     break;
             }

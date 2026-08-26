@@ -1,3 +1,5 @@
+package orion.parser;
+
 public enum Command {
     LIST,
     BYE,
