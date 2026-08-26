@@ -9,9 +9,17 @@ public class Orion {
             + "\\____/_/  /_/\\____/_/ /_/\n";
     private static final String LINE = "____________________________________________________________";
 
-    private static List<Task> tasks = new ArrayList<>();
+    private static List<Task> tasks;
+    private static Storage storage = new Storage("./data/orion.txt");
 
     public static void main(String[] args) {
+        try {
+            tasks = storage.load();
+        } catch (OrionException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Initialising an empty task list...");
+            tasks = new ArrayList<>();
+        }
         greet();
         boolean running = true;
         Scanner scanner = new Scanner(System.in);
@@ -123,6 +131,11 @@ public class Orion {
         System.out.println("  " + task);
         System.out.println("You now have " + tasks.size() + " task(s) in the list.");
         System.out.println(LINE);
+        try {
+            storage.save(tasks);
+        } catch (OrionException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void listTasks() {
@@ -145,6 +158,11 @@ public class Orion {
         }
         System.out.println("  " + task);
         System.out.println(LINE);
+        try {
+            storage.save(tasks);
+        } catch (OrionException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void deleteTask(int index) {
@@ -154,5 +172,10 @@ public class Orion {
         System.out.println("  " + task);
         System.out.println("You now have " + tasks.size() + " task(s) in the list.");
         System.out.println(LINE);
+        try {
+            storage.save(tasks);
+        } catch (OrionException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
