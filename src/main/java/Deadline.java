@@ -1,12 +1,14 @@
-public class Deadline extends Task {
-    protected String deadline;
+import java.time.LocalDateTime;
 
-    public Deadline(String description, String deadline) {
+public class Deadline extends Task {
+    protected LocalDateTime deadline;
+
+    public Deadline(String description, LocalDateTime deadline) {
         super(description);
         this.deadline = deadline;
     }
 
-    public Deadline(String description, String deadline, boolean isDone) {
+    public Deadline(String description, LocalDateTime deadline, boolean isDone) {
         super(description, isDone);
         this.deadline = deadline;
     }
@@ -18,11 +20,11 @@ public class Deadline extends Task {
 
     @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + deadline;
+        return super.toFileFormat() + " | " + deadline.format(Storage.SAVE_FORMAT);
     }
 
     @Override
     public String toString() {
-        return super.toString() + " (by: " + deadline + ")";
+        return super.toString() + " (by: " + deadline.format(OUTPUT_FORMAT) + ")";
     }
 }

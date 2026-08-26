@@ -1,12 +1,15 @@
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Storage {
     private String filePath;
+    public static final DateTimeFormatter SAVE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
 
     public Storage(String filePath) {
         this.filePath = filePath;
@@ -33,13 +36,13 @@ public class Storage {
                             break;
 
                         case "D":
-                            String deadline = parts[3];
+                            LocalDateTime deadline = LocalDateTime.parse(parts[3], SAVE_FORMAT);
                             tasks.add(new Deadline(description, deadline, isDone));
                             break;
 
                         case "E":
-                            String start = parts[3];
-                            String end = parts[4];
+                            LocalDateTime start = LocalDateTime.parse(parts[3], SAVE_FORMAT);
+                            LocalDateTime end = LocalDateTime.parse(parts[4], SAVE_FORMAT);
                             tasks.add(new Event(description, start, end, isDone));
                             break;
 

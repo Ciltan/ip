@@ -1,3 +1,7 @@
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -63,9 +67,9 @@ public class Orion {
                         if (deadlineParts.length == 1) {
                             throw new OrionException("You must provide the deadline of the task in " +
                                     "this format:\n" +
-                                    "\"deadline (description) /by (deadline)\"");
+                                    "\"deadline (description) /by (date)\"");
                         }
-                        addTask(new Deadline(deadlineParts[0], deadlineParts[1]));
+                        addTask(new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1])));
                         break;
 
                     case EVENT:
@@ -76,15 +80,15 @@ public class Orion {
                         if (eventParts.length == 1) {
                             throw new OrionException("You must specify the details of the event in " +
                                     "this format:\n" +
-                                    "\"event (description) /from (start) /to (end)\"");
+                                    "\"event (description) /from (date) /to (date)\"");
                         }
                         String[] timeParts = eventParts[1].split(" /to ");
                         if (timeParts.length == 1) {
                             throw new OrionException("You must specify the details of the event in " +
                                     "this format:\n" +
-                                    "\"event (description) /from (start) /to (end)\"");
+                                    "\"event (description) /from (date) /to (date)\"");
                         }
-                        addTask(new Event(eventParts[0], timeParts[0], timeParts[1]));
+                        addTask(new Event(eventParts[0], parseDateTime(timeParts[0]), parseDateTime(timeParts[1])));
                         break;
 
                     case DELETE:
@@ -178,4 +182,28 @@ public class Orion {
             System.out.println(e.getMessage());
         }
     }
+
+    private static LocalDateTime parseDateTime(String input) {
+        DateTimeFormatter[] formatters = {
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy HHmm"),
+                DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+                DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+        };
+
+        for (DateTimeFormatter formatter : formatters) {
+            try {
+                return LocalDateTime.parse(input, formatter);
+            } catch (DateTimeParseException e) {
+                try {
+                    return LocalDate.parse(input, formatter).atStartOfDay();
+                } catch (DateTimeParseException ex) {
+
+                }
+            }
+        }
+
+        throw new OrionException("Invalid date format! Try: yyyy-mm-dd or dd/mm/yyyy\n(Specifying time in 24h format is optional)");
+    }
+
 }
