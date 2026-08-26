@@ -1,3 +1,7 @@
+package orion.task;
+
+import orion.storage.Storage;
+
 import java.time.LocalDateTime;
 
 public class Event extends Task {
