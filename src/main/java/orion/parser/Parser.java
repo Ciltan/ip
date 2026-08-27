@@ -29,7 +29,7 @@ public class Parser {
             String arguments = parts.length == 2 ? parts[1] : null;
 
             switch (command) {
-                case Command.LIST:
+                case LIST:
                     ui.showLine();
                     ui.showMessage("Here are the tasks in your list:");
                     for (int i = 0; i < tasks.getSize(); i++) {
@@ -38,26 +38,26 @@ public class Parser {
                     ui.showLine();
                     break;
 
-                case Command.BYE:
+                case BYE:
                     ui.showGoodbye();
                     return false;
 
-                case Command.MARK:
+                case MARK:
                     markTask(Integer.parseInt(arguments) - 1, true, tasks, ui, storage);
                     break;
 
-                case Command.UNMARK:
+                case UNMARK:
                     markTask(Integer.parseInt(arguments) - 1, false, tasks, ui, storage);
                     break;
 
-                case Command.TODO:
+                case TODO:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description for the task!");
                     }
                     addTask(new Todo(arguments), tasks, ui, storage);
                     break;
 
-                case Command.DEADLINE:
+                case DEADLINE:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description and deadline!");
                     }
@@ -70,7 +70,7 @@ public class Parser {
                     addTask(new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1])), tasks, ui, storage);
                     break;
 
-                case Command.EVENT:
+                case EVENT:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description and start/end!");
                     }
@@ -89,9 +89,12 @@ public class Parser {
                     addTask(new Event(eventParts[0], parseDateTime(timeParts[0]), parseDateTime(timeParts[1])), tasks, ui, storage);
                     break;
 
-                case Command.DELETE:
+                case DELETE:
                     deleteTask(Integer.parseInt(arguments) - 1, tasks, ui, storage);
                     break;
+
+                default:
+                    throw new OrionException("That is not a valid command!");
             }
         } catch (OrionException e) {
             ui.showError(e.getMessage());
@@ -105,11 +108,13 @@ public class Parser {
 
     private static void addTask(Task task, TaskList tasks, Ui ui, Storage storage) {
         tasks.addTask(task);
+
         ui.showLine();
         ui.showMessage("Got it. I've added this task:");
         ui.showMessage("  " + task);
         ui.showMessage("You now have " + tasks.getSize() + " task(s) in the list.");
         ui.showLine();
+
         try {
             storage.save(tasks.getTasks());
         } catch (OrionException e) {
@@ -120,10 +125,12 @@ public class Parser {
     private static void markTask(int index, boolean isDone, TaskList tasks, Ui ui, Storage storage) {
         Task task = tasks.getTask(index);
         task.setDone(isDone);
+
         ui.showLine();
         ui.showMessage(isDone ? "Nice! I've marked this task as done:" : "OK, I've marked this task as not done yet:");
         ui.showMessage("  " + task);
         ui.showLine();
+
         try {
             storage.save(tasks.getTasks());
         } catch (OrionException e) {
@@ -133,11 +140,13 @@ public class Parser {
 
     private static void deleteTask(int index, TaskList tasks, Ui ui, Storage storage) {
         Task task = tasks.removeTask(index);
+
         ui.showLine();
         ui.showMessage("Got it. I've removed this task:");
         ui.showMessage("  " + task);
         ui.showMessage("You now have " + tasks.getSize() + " task(s) in the list.");
         ui.showLine();
+
         try {
             storage.save(tasks.getTasks());
         } catch (OrionException e) {

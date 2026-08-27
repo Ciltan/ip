@@ -14,6 +14,7 @@ public class Orion {
     public Orion(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
+
         try {
             tasks = new TaskList(storage.load());
         } catch (OrionException e) {
@@ -25,6 +26,7 @@ public class Orion {
     public void run() {
         ui.showWelcome();
         boolean isRunning = true;
+
         while (isRunning) {
             String command = ui.readCommand();
             isRunning = Parser.parseAndExecute(command, tasks, ui, storage);
