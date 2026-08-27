@@ -4,6 +4,9 @@ import orion.storage.Storage;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a task that needs to be completed by a specific date and time.
+ */
 public class Deadline extends Task {
     protected LocalDateTime deadline;
 

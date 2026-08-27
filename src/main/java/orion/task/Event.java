@@ -4,6 +4,9 @@ import orion.storage.Storage;
 
 import java.time.LocalDateTime;
 
+/**
+ * Represents a task that occurs within a specific time frame.
+ */
 public class Event extends Task {
     protected LocalDateTime start;
     protected LocalDateTime end;

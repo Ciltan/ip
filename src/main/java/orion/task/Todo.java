@@ -1,5 +1,8 @@
 package orion.task;
 
+/**
+ * Represents a task without any specific date or time constraints.
+ */
 public class Todo extends Task {
 
     public Todo(String description) {
