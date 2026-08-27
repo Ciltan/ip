@@ -104,6 +104,12 @@ public class Parser {
                 case DELETE:
                     deleteTask(Integer.parseInt(arguments) - 1, tasks, ui, storage);
                     break;
+                    
+                case FIND:
+                    if (arguments == null) {
+                        throw new OrionException("You must provide a keyword to search for!");
+                    }
+                    findTask(arguments, tasks, ui);
 
                 default:
                     throw new OrionException("That is not a valid command!");
@@ -186,5 +192,19 @@ public class Parser {
         }
         throw new OrionException("Invalid date format! Try: yyyy-mm-dd or dd/mm/yyyy\n" +
                 "(Specifying time in 24h format is optional)");
+    }
+
+    private static void findTask(String keyword, TaskList tasks, Ui ui) {
+        ui.showLine();
+        ui.showMessage("Here are the matching tasks in your list:");
+
+        int count = 1;
+        for (Task task : tasks.getTasks()) {
+            if (task.getDescription().contains(keyword)) {
+                ui.showMessage(count++ + ". " + task);
+            }
+        }
+
+        ui.showLine();
     }
 }
