@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * Handles the loading and saving of task data to a file.
+ */
 public class Storage {
     private String filePath;
     public static final DateTimeFormatter SAVE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
@@ -23,6 +26,12 @@ public class Storage {
         this.filePath = filePath;
     }
 
+    /**
+     * Loads the tasks from the save file.
+     *
+     * @return A list of tasks parsed from the save file.
+     * @throws OrionException If there is an error reading the file or parsing the data.
+     */
     public List<Task> load() throws OrionException {
         List<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
@@ -68,6 +77,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves the current list of tasks to the save file.
+     *
+     * @param tasks The list of tasks to be saved.
+     * @throws OrionException If there is an error writing the tasks to the file.
+     */
     public void save(List<Task> tasks) throws OrionException {
         try {
             File file = new File(filePath);

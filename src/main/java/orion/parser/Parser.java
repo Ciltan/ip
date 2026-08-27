@@ -14,8 +14,20 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
+/**
+ * Handles the parsing of user input and execution of commands.
+ */
 public class Parser {
 
+    /**
+     * Parses the user input and executes the corresponding command.
+     *
+     * @param input Raw command string entered by the user.
+     * @param tasks TaskList containing the current tasks.
+     * @param ui Ui object to handle user interactions.
+     * @param storage Storage object to handle saving data.
+     * @return {@code true} if the program should continue running, {@code false} if it should exit.
+     */
     public static boolean parseAndExecute(String input, TaskList tasks, Ui ui, Storage storage) {
         try {
             String[] parts = input.split(" ", 2);
