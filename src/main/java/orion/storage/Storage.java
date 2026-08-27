@@ -47,6 +47,7 @@ public class Storage {
                     String taskType = parts[0];
                     boolean isDone = parts[1].equals("1");
                     String description = parts[2];
+
                     switch (taskType) {
                         case "T":
                             tasks.add(new Todo(description, isDone));
@@ -89,6 +90,7 @@ public class Storage {
             if (file.getParentFile() != null) {
                 file.getParentFile().mkdirs();
             }
+
             FileWriter fw = new FileWriter(filePath);
             for (Task task : tasks) {
                 fw.write(task.toFileFormat() + System.lineSeparator());
