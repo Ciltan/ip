@@ -1,11 +1,5 @@
 package orion.storage;
 
-import orion.exception.OrionException;
-import orion.task.Deadline;
-import orion.task.Event;
-import orion.task.Task;
-import orion.task.Todo;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -15,12 +9,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import orion.exception.OrionException;
+import orion.task.Deadline;
+import orion.task.Event;
+import orion.task.Task;
+import orion.task.Todo;
+
 /**
  * Handles the loading and saving of task data to a file.
  */
 public class Storage {
-    private String filePath;
     public static final DateTimeFormatter SAVE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    private String filePath;
 
     public Storage(String filePath) {
         this.filePath = filePath;

@@ -1,5 +1,10 @@
 package orion.parser;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+
 import orion.exception.OrionException;
 import orion.storage.Storage;
 import orion.task.Deadline;
@@ -8,11 +13,6 @@ import orion.task.Task;
 import orion.task.TaskList;
 import orion.task.Todo;
 import orion.ui.Ui;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 /**
  * Handles the parsing of user input and execution of commands.
@@ -75,9 +75,8 @@ public class Parser {
                     }
                     String[] deadlineParts = arguments.split(" /by ");
                     if (deadlineParts.length == 1) {
-                        throw new OrionException("You must provide the deadline of the task in " +
-                                "this format:\n" +
-                                "\"deadline (description) /by (date)\"");
+                        throw new OrionException("You must provide the deadline of the task in this format:\n"
+                                + "\"deadline (description) /by (date)\"");
                     }
                     addTask(new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1])), tasks, ui, storage);
                     break;
@@ -88,28 +87,30 @@ public class Parser {
                     }
                     String[] eventParts = arguments.split(" /from ");
                     if (eventParts.length == 1) {
-                        throw new OrionException("You must specify the details of the event in " +
-                                "this format:\n" +
-                                "\"event (description) /from (date) /to (date)\"");
+                        throw new OrionException("You must specify the details of the event in this format:\n"
+                                + "\"event (description) /from (date) /to (date)\"");
                     }
                     String[] timeParts = eventParts[1].split(" /to ");
                     if (timeParts.length == 1) {
-                        throw new OrionException("You must specify the details of the event in " +
-                                "this format:\n" +
-                                "\"event (description) /from (date) /to (date)\"");
+                        throw new OrionException("You must specify the details of the event in this format:\n"
+                                + "\"event (description) /from (date) /to (date)\"");
                     }
-                    addTask(new Event(eventParts[0], parseDateTime(timeParts[0]), parseDateTime(timeParts[1])), tasks, ui, storage);
+                    String description = eventParts[0];
+                    LocalDateTime startTime = parseDateTime(timeParts[0]);
+                    LocalDateTime endTime = parseDateTime(timeParts[1]);
+                    addTask(new Event(description, startTime, endTime), tasks, ui, storage);
                     break;
 
                 case DELETE:
                     deleteTask(Integer.parseInt(arguments) - 1, tasks, ui, storage);
                     break;
-                    
+
                 case FIND:
                     if (arguments == null) {
                         throw new OrionException("You must provide a keyword to search for!");
                     }
                     findTask(arguments, tasks, ui);
+                    break;
 
                 default:
                     throw new OrionException("That is not a valid command!");
@@ -186,12 +187,12 @@ public class Parser {
                 try {
                     return LocalDate.parse(input, formatter).atStartOfDay();
                 } catch (DateTimeParseException ex) {
-
+                    // Input did not match the formatter's pattern, ignore the exception and continue with the next one
                 }
             }
         }
-        throw new OrionException("Invalid date format! Try: yyyy-mm-dd or dd/mm/yyyy\n" +
-                "(Specifying time in 24h format is optional)");
+        throw new OrionException("Invalid date format! Try: yyyy-mm-dd or dd/mm/yyyy\n"
+                + "(Specifying time in 24h format is optional)");
     }
 
     private static void findTask(String keyword, TaskList tasks, Ui ui) {
