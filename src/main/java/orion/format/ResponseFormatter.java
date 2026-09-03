@@ -12,7 +12,7 @@ public class ResponseFormatter {
      * Returns the welcome message to the user.
      */
     public String getWelcomeMessage() {
-        return "Hello! I'm Orion, your friendly chatbot.\nWhat can I do for you?";
+        return formatLines("Hello! I'm Orion, your friendly chatbot.", "What can I do for you?");
     }
 
     /**
@@ -47,8 +47,10 @@ public class ResponseFormatter {
      * @return The formatted success message.
      */
     public String getTaskAddedMessage(Task task, int size) {
-        return "Got it. I've added this task:\n  " + task
-                + "\nYou now have " + size + " task(s) in the list.";
+        return formatLines("Got it. I've added this task:",
+                "  " + task,
+                "You now have " + size + " task(s) in the list."
+        );
     }
 
     /**
@@ -72,8 +74,10 @@ public class ResponseFormatter {
      * @return The formatted deletion message.
      */
     public String getTaskDeletedMessage(Task task, int size) {
-        return "Got it. I've removed this task:\n  " + task
-                + "\nYou now have " + size + " task(s) in the list.";
+        return formatLines("Got it. I've removed this task:",
+                "  " + task,
+                "You now have " + size + " task(s) in the list."
+        );
     }
 
     /**
@@ -96,4 +100,9 @@ public class ResponseFormatter {
         }
         return sb.toString().trim();
     }
+
+    private String formatLines(String... lines) {
+        return String.join("\n", lines);
+    }
+
 }
