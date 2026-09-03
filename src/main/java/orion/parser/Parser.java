@@ -6,13 +6,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 
 import orion.exception.OrionException;
+import orion.format.ResponseFormatter;
 import orion.storage.Storage;
 import orion.task.Deadline;
 import orion.task.Event;
 import orion.task.Task;
 import orion.task.TaskList;
 import orion.task.Todo;
-import orion.ui.Ui;
 
 /**
  * Handles the parsing of user input and execution of commands.
@@ -24,11 +24,11 @@ public class Parser {
      *
      * @param input Raw command string entered by the user.
      * @param tasks TaskList containing the current tasks.
-     * @param ui Ui object to handle user interactions.
+     * @param formatter ResponseFormatter object to handle text formatting.
      * @param storage Storage object to handle saving data.
-     * @return {@code true} if the program should continue running, {@code false} if it should exit.
+     * @return The formatted response string to display to the user.
      */
-    public static boolean parseAndExecute(String input, TaskList tasks, Ui ui, Storage storage) {
+    public static String parseAndExecute(String input, TaskList tasks, ResponseFormatter formatter, Storage storage) {
         try {
             String[] parts = input.split(" ", 2);
             Command command;
@@ -42,32 +42,22 @@ public class Parser {
 
             switch (command) {
                 case LIST:
-                    ui.showLine();
-                    ui.showMessage("Here are the tasks in your list:");
-                    for (int i = 0; i < tasks.getSize(); i++) {
-                        ui.showMessage((i + 1) + ". " + tasks.getTask(i));
-                    }
-                    ui.showLine();
-                    break;
+                    return formatter.getTaskListMessage(tasks);
 
                 case BYE:
-                    ui.showGoodbye();
-                    return false;
+                    return formatter.getGoodbyeMessage();
 
                 case MARK:
-                    markTask(Integer.parseInt(arguments) - 1, true, tasks, ui, storage);
-                    break;
+                    return markTask(Integer.parseInt(arguments) - 1, true, tasks, formatter, storage);
 
                 case UNMARK:
-                    markTask(Integer.parseInt(arguments) - 1, false, tasks, ui, storage);
-                    break;
+                    return markTask(Integer.parseInt(arguments) - 1, false, tasks, formatter, storage);
 
                 case TODO:
                     if (arguments == null) {
                         throw new OrionException("You must provide a description for the task!");
                     }
-                    addTask(new Todo(arguments), tasks, ui, storage);
-                    break;
+                    return addTask(new Todo(arguments), tasks, formatter, storage);
 
                 case DEADLINE:
                     if (arguments == null) {
@@ -78,8 +68,8 @@ public class Parser {
                         throw new OrionException("You must provide the deadline of the task in this format:\n"
                                 + "\"deadline (description) /by (date)\"");
                     }
-                    addTask(new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1])), tasks, ui, storage);
-                    break;
+                    LocalDateTime deadline = parseDateTime(deadlineParts[1]);
+                    return addTask(new Deadline(deadlineParts[0], deadline), tasks, formatter, storage);
 
                 case EVENT:
                     if (arguments == null) {
@@ -98,79 +88,51 @@ public class Parser {
                     String description = eventParts[0];
                     LocalDateTime startTime = parseDateTime(timeParts[0]);
                     LocalDateTime endTime = parseDateTime(timeParts[1]);
-                    addTask(new Event(description, startTime, endTime), tasks, ui, storage);
-                    break;
+                    return addTask(new Event(description, startTime, endTime), tasks, formatter, storage);
 
                 case DELETE:
-                    deleteTask(Integer.parseInt(arguments) - 1, tasks, ui, storage);
-                    break;
+                    return deleteTask(Integer.parseInt(arguments) - 1, tasks, formatter, storage);
 
                 case FIND:
                     if (arguments == null) {
                         throw new OrionException("You must provide a keyword to search for!");
                     }
-                    findTask(arguments, tasks, ui);
-                    break;
+                    return findTask(arguments, tasks, formatter);
 
                 default:
                     throw new OrionException("That is not a valid command!");
             }
         } catch (OrionException e) {
-            ui.showError(e.getMessage());
+            return e.getMessage();
         } catch (NumberFormatException e) {
-            ui.showError("Could not parse the task number you provided!");
+            return "Could not parse the task number you provided!";
         } catch (IndexOutOfBoundsException e) {
-            ui.showError("You do not have a task with the number you provided!");
+            return "You do not have a task with the number you provided!";
         }
-        return true;
     }
 
-    private static void addTask(Task task, TaskList tasks, Ui ui, Storage storage) {
+    private static String addTask(Task task, TaskList tasks, ResponseFormatter formatter, Storage storage) {
         tasks.addTask(task);
-
-        ui.showLine();
-        ui.showMessage("Got it. I've added this task:");
-        ui.showMessage("  " + task);
-        ui.showMessage("You now have " + tasks.getSize() + " task(s) in the list.");
-        ui.showLine();
-
-        try {
-            storage.save(tasks.getTasks());
-        } catch (OrionException e) {
-            ui.showError(e.getMessage());
-        }
+        storage.save(tasks.getTasks());
+        return formatter.getTaskAddedMessage(task, tasks.getSize());
     }
 
-    private static void markTask(int index, boolean isDone, TaskList tasks, Ui ui, Storage storage) {
+    private static String markTask(int index, boolean isDone, TaskList tasks,
+                                   ResponseFormatter formatter, Storage storage) {
         Task task = tasks.getTask(index);
         task.setDone(isDone);
-
-        ui.showLine();
-        ui.showMessage(isDone ? "Nice! I've marked this task as done:" : "OK, I've marked this task as not done yet:");
-        ui.showMessage("  " + task);
-        ui.showLine();
-
-        try {
-            storage.save(tasks.getTasks());
-        } catch (OrionException e) {
-            ui.showError(e.getMessage());
-        }
+        storage.save(tasks.getTasks());
+        return formatter.getTaskMarkedMessage(task, isDone);
     }
 
-    private static void deleteTask(int index, TaskList tasks, Ui ui, Storage storage) {
+    private static String deleteTask(int index, TaskList tasks, ResponseFormatter formatter, Storage storage) {
         Task task = tasks.removeTask(index);
+        storage.save(tasks.getTasks());
+        return formatter.getTaskDeletedMessage(task, tasks.getSize());
+    }
 
-        ui.showLine();
-        ui.showMessage("Got it. I've removed this task:");
-        ui.showMessage("  " + task);
-        ui.showMessage("You now have " + tasks.getSize() + " task(s) in the list.");
-        ui.showLine();
-
-        try {
-            storage.save(tasks.getTasks());
-        } catch (OrionException e) {
-            ui.showError(e.getMessage());
-        }
+    private static String findTask(String keyword, TaskList tasks, ResponseFormatter formatter) {
+        return formatter.getMatchingTasksMessage(keyword, tasks);
     }
 
     private static LocalDateTime parseDateTime(String input) {
@@ -193,19 +155,5 @@ public class Parser {
         }
         throw new OrionException("Invalid date format! Try: yyyy-mm-dd or dd/mm/yyyy\n"
                 + "(Specifying time in 24h format is optional)");
-    }
-
-    private static void findTask(String keyword, TaskList tasks, Ui ui) {
-        ui.showLine();
-        ui.showMessage("Here are the matching tasks in your list:");
-
-        int count = 1;
-        for (Task task : tasks.getTasks()) {
-            if (task.getDescription().contains(keyword)) {
-                ui.showMessage(count++ + ". " + task);
-            }
-        }
-
-        ui.showLine();
     }
 }

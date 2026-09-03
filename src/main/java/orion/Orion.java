@@ -1,20 +1,22 @@
 package orion;
 
+import java.util.Scanner;
+
 import orion.exception.OrionException;
+import orion.format.ResponseFormatter;
 import orion.parser.Parser;
 import orion.storage.Storage;
 import orion.task.TaskList;
-import orion.ui.Ui;
 
 /**
- * Serves as the main entry point for the Orion chatbot application.
- * It initializes the core components such as the user interface, storage,
- * and task list, and ties them together to run the program.
+ * Serves as the core logic hub for the Orion chatbot application.
+ * It initializes the main components such as the response formatter, storage,
+ * and task list, and processes incoming commands from either the CLI or GUI.
  */
 public class Orion {
     private Storage storage;
     private TaskList tasks;
-    private Ui ui;
+    private ResponseFormatter formatter;
 
     /**
      * Initializes the Orion chatbot with the specified storage file path.
@@ -24,13 +26,13 @@ public class Orion {
      * @param filePath The relative path to the file where tasks are saved.
      */
     public Orion(String filePath) {
-        ui = new Ui();
+        formatter = new ResponseFormatter();
         storage = new Storage(filePath);
 
         try {
             tasks = new TaskList(storage.load());
         } catch (OrionException e) {
-            ui.showError(e.getMessage() + "\nInitialising an empty task list...");
+            System.out.println(e.getMessage() + "\nInitialising an empty task list...");
             tasks = new TaskList();
         }
     }
@@ -41,18 +43,57 @@ public class Orion {
      * and executes user commands until the exit command is given.
      */
     public void run() {
-        ui.showWelcome();
+        String banner = "  ____       _\n"
+                + " / __ \\_____(_)___  ____\n"
+                + "/ /_/ / ___/ / __ \\/ __ \\\n"
+                + "\\____/_/  /_/\\____/_/ /_/\n";
+        String line = "____________________________________________________________";
+
+        System.out.println(line);
+        System.out.println(banner);
+        System.out.println(formatter.getWelcomeMessage());
+        System.out.println(line);
+
+        Scanner scanner = new Scanner(System.in);
         boolean isRunning = true;
 
         while (isRunning) {
-            String command = ui.readCommand();
-            isRunning = Parser.parseAndExecute(command, tasks, ui, storage);
+            System.out.print("\n> ");
+            String command = scanner.nextLine();
+            if (command.trim().equalsIgnoreCase("bye")) {
+                isRunning = false;
+            }
+
+            System.out.println(line);
+            System.out.println(Parser.parseAndExecute(command, tasks, formatter, storage));
+            System.out.println(line);
         }
+
+        scanner.close();
     }
 
     /**
-     * Serves as the main entry point for the Java runtime environment.
-     * Creates a new instance of the Orion chatbot and starts its execution.
+     * Generates a response for the user's chat message.
+     *
+     * @param input The user's input text.
+     * @return A string representing Orion's response.
+     */
+    public String getResponse(String input) {
+        return Parser.parseAndExecute(input, tasks, formatter, storage);
+    }
+
+    /**
+     * Generates the welcome message upon application startup.
+     *
+     * @return A string representing Orion's welcome message.
+     */
+    public String getWelcomeMessage() {
+        return formatter.getWelcomeMessage();
+    }
+
+    /**
+     * Serves as the entry point for the Command Line Interface (CLI) mode.
+     * Creates a new instance of the Orion chatbot and starts its text-based execution.
      *
      * @param args Command line arguments supplied by the operating system.
      */
