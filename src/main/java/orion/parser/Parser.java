@@ -29,6 +29,7 @@ public class Parser {
      * @return The formatted response string to display to the user.
      */
     public static String parseAndExecute(String input, TaskList tasks, ResponseFormatter formatter, Storage storage) {
+        assert input != null : "Command input string should not be null";
         try {
             String[] parts = input.split(" ", 2);
             Command command;
@@ -112,6 +113,7 @@ public class Parser {
     }
 
     private static String addTask(Task task, TaskList tasks, ResponseFormatter formatter, Storage storage) {
+        assert task != null : "Task being added should not be null";
         tasks.addTask(task);
         storage.save(tasks.getTasks());
         return formatter.getTaskAddedMessage(task, tasks.getSize());
@@ -119,6 +121,7 @@ public class Parser {
 
     private static String markTask(int index, boolean isDone, TaskList tasks,
                                    ResponseFormatter formatter, Storage storage) {
+        assert index >= 0 : "Task index should not be negative";
         Task task = tasks.getTask(index);
         task.setDone(isDone);
         storage.save(tasks.getTasks());
@@ -126,6 +129,7 @@ public class Parser {
     }
 
     private static String deleteTask(int index, TaskList tasks, ResponseFormatter formatter, Storage storage) {
+        assert index >= 0 : "Task index should not be negative";
         Task task = tasks.removeTask(index);
         storage.save(tasks.getTasks());
         return formatter.getTaskDeletedMessage(task, tasks.getSize());
