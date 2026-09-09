@@ -1,5 +1,7 @@
 package orion.format;
 
+import java.util.List;
+
 import orion.task.Task;
 import orion.task.TaskList;
 
@@ -88,15 +90,14 @@ public class ResponseFormatter {
      * @return A formatted string of matching tasks.
      */
     public String getMatchingTasksMessage(String keyword, TaskList tasks) {
+        List<Task> matchingTasks = tasks.findTasks(keyword);
+        if (matchingTasks.isEmpty()) {
+            return "There aren't any tasks that matched your search keyword of \"" + keyword + "\"!";
+        }
         StringBuilder sb = new StringBuilder("Here are the matching tasks in your list:\n");
         int count = 1;
-        for (Task task : tasks.getTasks()) {
-            if (task.getDescription().contains(keyword)) {
-                sb.append(count++).append(". ").append(task).append("\n");
-            }
-        }
-        if (count == 1) {
-            return "There aren't any tasks that matched your search keyword!";
+        for (Task task : matchingTasks) {
+            sb.append(count++).append(". ").append(task).append("\n");
         }
         return sb.toString().trim();
     }
