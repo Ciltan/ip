@@ -1,10 +1,11 @@
 package orion.storage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -19,7 +20,6 @@ import orion.task.Todo;
  * Handles the loading and saving of task data to a file.
  */
 public class Storage {
-    public static final DateTimeFormatter SAVE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
     private String filePath;
 
     public Storage(String filePath) {
@@ -36,45 +36,42 @@ public class Storage {
     public List<Task> load() throws OrionException {
         List<Task> tasks = new ArrayList<>();
         File file = new File(filePath);
-        try {
-            if (!file.exists()) {
-                return tasks;
-            }
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNext()) {
+        if (!file.exists()) {
+            return tasks;
+        }
+        try (Scanner scanner = new Scanner(file)) {
+            while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
-                try {
-                    String[] parts = line.split(" \\| ");
-                    String taskType = parts[0];
-                    boolean isDone = parts[1].equals("1");
-                    String description = parts[2];
+                String[] parts = line.split(" \\| ");
+                String taskType = parts[0];
+                boolean isDone = parts[1].equals("1");
+                String description = parts[2];
 
-                    switch (taskType) {
-                        case "T":
-                            tasks.add(new Todo(description, isDone));
-                            break;
+                switch (taskType) {
+                    case "T":
+                        tasks.add(new Todo(description, isDone));
+                        break;
 
-                        case "D":
-                            LocalDateTime deadline = LocalDateTime.parse(parts[3], SAVE_FORMAT);
-                            tasks.add(new Deadline(description, deadline, isDone));
-                            break;
+                    case "D":
+                        LocalDateTime deadline = LocalDateTime.parse(parts[3], Task.SAVE_FORMAT);
+                        tasks.add(new Deadline(description, deadline, isDone));
+                        break;
 
-                        case "E":
-                            LocalDateTime start = LocalDateTime.parse(parts[3], SAVE_FORMAT);
-                            LocalDateTime end = LocalDateTime.parse(parts[4], SAVE_FORMAT);
-                            tasks.add(new Event(description, start, end, isDone));
-                            break;
+                    case "E":
+                        LocalDateTime start = LocalDateTime.parse(parts[3], Task.SAVE_FORMAT);
+                        LocalDateTime end = LocalDateTime.parse(parts[4], Task.SAVE_FORMAT);
+                        tasks.add(new Event(description, start, end, isDone));
+                        break;
 
-                        default:
-                            System.out.println("Unknown task type found in save file. Skipping line: " + line);
-                            break;
-                    }
-                } catch (Exception e) {
-                    System.out.println("Corrupted data found in save file. Skipping line:" + line);
+                    default:
+                        System.out.println("Unknown task type found in save file. Skipping line: " + line);
+                        break;
                 }
             }
-        } catch (IOException e) {
-            throw new OrionException("There was an error loading tasks from the save file.");
+        } catch (FileNotFoundException e) {
+            throw new OrionException("Could not find the save file!");
+        } catch (IndexOutOfBoundsException | NumberFormatException | DateTimeParseException e) {
+            System.out.println("Corrupted data found in save file. Skipping line...");
         }
         return tasks;
     }
@@ -92,11 +89,11 @@ public class Storage {
                 file.getParentFile().mkdirs();
             }
 
-            FileWriter fw = new FileWriter(filePath);
-            for (Task task : tasks) {
-                fw.write(task.toFileFormat() + System.lineSeparator());
+            try (FileWriter fw = new FileWriter(filePath)) {
+                for (Task task : tasks) {
+                    fw.write(task.toFileFormat() + System.lineSeparator());
+                }
             }
-            fw.close();
         } catch (IOException e) {
             throw new OrionException("There was an error saving tasks to the save file.");
         }

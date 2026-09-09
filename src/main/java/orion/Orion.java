@@ -59,13 +59,14 @@ public class Orion {
 
         while (isRunning) {
             System.out.print("\n> ");
-            String command = scanner.nextLine();
-            if (command.trim().equalsIgnoreCase("bye")) {
+            String input = scanner.nextLine();
+
+            if (Parser.isExit(input)) {
                 isRunning = false;
             }
 
             System.out.println(line);
-            System.out.println(Parser.parseAndExecute(command, tasks, formatter, storage));
+            System.out.println(Parser.parseAndExecute(input, tasks, formatter, storage));
             System.out.println(line);
         }
 

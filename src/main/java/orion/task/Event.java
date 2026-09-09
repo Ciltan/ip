@@ -2,8 +2,6 @@ package orion.task;
 
 import java.time.LocalDateTime;
 
-import orion.storage.Storage;
-
 /**
  * Represents a task that occurs within a specific time frame.
  */
@@ -45,8 +43,7 @@ public class Event extends Task {
 
     @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + start.format(Storage.SAVE_FORMAT) + " | "
-                + end.format(Storage.SAVE_FORMAT);
+        return super.toFileFormat() + " | " + start.format(SAVE_FORMAT) + " | " + end.format(SAVE_FORMAT);
     }
 
     @Override

@@ -2,8 +2,6 @@ package orion.task;
 
 import java.time.LocalDateTime;
 
-import orion.storage.Storage;
-
 /**
  * Represents a task that needs to be completed by a specific date and time.
  */
@@ -40,7 +38,7 @@ public class Deadline extends Task {
 
     @Override
     public String toFileFormat() {
-        return super.toFileFormat() + " | " + deadline.format(Storage.SAVE_FORMAT);
+        return super.toFileFormat() + " | " + deadline.format(SAVE_FORMAT);
     }
 
     @Override
