@@ -40,6 +40,7 @@ public class MainWindow extends AnchorPane {
     }
 
     public void setOrion(Orion orion) {
+        assert orion != null : "Orion instance should be successfully initialised before setting";
         this.orion = orion;
         dialogContainer.getChildren().add(DialogBox.getOrionDialog(this.orion.getWelcomeMessage(), orionImage));
     }
