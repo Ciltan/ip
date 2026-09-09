@@ -11,6 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import orion.Orion;
+import orion.parser.Parser;
 
 /**
  * Controller for the main GUI. Provides the layout for the other controls.
@@ -60,7 +61,9 @@ public class MainWindow extends AnchorPane {
         );
         userInput.clear();
 
-        if (input.trim().equalsIgnoreCase("bye")) {
+        if (Parser.isExit(input)) {
+            userInput.setDisable(true);
+            sendButton.setDisable(true);
             PauseTransition delay = new PauseTransition(Duration.seconds(2));
             delay.setOnFinished(event -> Platform.exit());
             delay.play();

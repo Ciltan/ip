@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
  * Represents a general task with a description and a completion status.
  */
 public abstract class Task {
+    public static final DateTimeFormatter SAVE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
     protected static final DateTimeFormatter OUTPUT_FORMAT = DateTimeFormatter.ofPattern("MMM dd yyyy, h:mm a");
 
     protected String description;

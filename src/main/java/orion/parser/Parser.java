@@ -54,47 +54,22 @@ public class Parser {
                     return markTask(Integer.parseInt(arguments) - 1, false, tasks, formatter, storage);
 
                 case TODO:
-                    if (arguments == null) {
+                    if (arguments == null || arguments.isBlank()) {
                         throw new OrionException("You must provide a description for the task!");
                     }
                     return addTask(new Todo(arguments), tasks, formatter, storage);
 
                 case DEADLINE:
-                    if (arguments == null) {
-                        throw new OrionException("You must provide a description and deadline!");
-                    }
-                    String[] deadlineParts = arguments.split(" /by ");
-                    if (deadlineParts.length == 1) {
-                        throw new OrionException("You must provide the deadline of the task in this format:\n"
-                                + "\"deadline (description) /by (date)\"");
-                    }
-                    LocalDateTime deadline = parseDateTime(deadlineParts[1]);
-                    return addTask(new Deadline(deadlineParts[0], deadline), tasks, formatter, storage);
+                    return addTask(createDeadline(arguments), tasks, formatter, storage);
 
                 case EVENT:
-                    if (arguments == null) {
-                        throw new OrionException("You must provide a description and start/end!");
-                    }
-                    String[] eventParts = arguments.split(" /from ");
-                    if (eventParts.length == 1) {
-                        throw new OrionException("You must specify the details of the event in this format:\n"
-                                + "\"event (description) /from (date) /to (date)\"");
-                    }
-                    String[] timeParts = eventParts[1].split(" /to ");
-                    if (timeParts.length == 1) {
-                        throw new OrionException("You must specify the details of the event in this format:\n"
-                                + "\"event (description) /from (date) /to (date)\"");
-                    }
-                    String description = eventParts[0];
-                    LocalDateTime startTime = parseDateTime(timeParts[0]);
-                    LocalDateTime endTime = parseDateTime(timeParts[1]);
-                    return addTask(new Event(description, startTime, endTime), tasks, formatter, storage);
+                    return addTask(createEvent(arguments), tasks, formatter, storage);
 
                 case DELETE:
                     return deleteTask(Integer.parseInt(arguments) - 1, tasks, formatter, storage);
 
                 case FIND:
-                    if (arguments == null) {
+                    if (arguments == null || arguments.isBlank()) {
                         throw new OrionException("You must provide a keyword to search for!");
                     }
                     return findTask(arguments, tasks, formatter);
@@ -106,8 +81,24 @@ public class Parser {
             return e.getMessage();
         } catch (NumberFormatException e) {
             return "Could not parse the task number you provided!";
-        } catch (IndexOutOfBoundsException e) {
-            return "You do not have a task with the number you provided!";
+        }
+    }
+
+    /**
+     * Checks if the given user input is an exit command.
+     *
+     * @param input Raw command string entered by the user.
+     * @return {@code true} if the command is the exit command, {@code false} otherwise.
+     */
+    public static boolean isExit(String input) {
+        if (input == null || input.isBlank()) {
+            return false;
+        }
+        String[] parts = input.split(" ", 2);
+        try {
+            return Command.valueOf(parts[0].toUpperCase()) == Command.BYE;
+        } catch (IllegalArgumentException e) {
+            return false;
         }
     }
 
@@ -119,20 +110,60 @@ public class Parser {
 
     private static String markTask(int index, boolean isDone, TaskList tasks,
                                    ResponseFormatter formatter, Storage storage) {
-        Task task = tasks.getTask(index);
-        task.setDone(isDone);
-        storage.save(tasks.getTasks());
-        return formatter.getTaskMarkedMessage(task, isDone);
+        try {
+            Task task = tasks.getTask(index);
+            task.setDone(isDone);
+            storage.save(tasks.getTasks());
+            return formatter.getTaskMarkedMessage(task, isDone);
+        } catch (IndexOutOfBoundsException e) {
+            return "You do not have a task with the number you provided!";
+        }
     }
 
     private static String deleteTask(int index, TaskList tasks, ResponseFormatter formatter, Storage storage) {
-        Task task = tasks.removeTask(index);
-        storage.save(tasks.getTasks());
-        return formatter.getTaskDeletedMessage(task, tasks.getSize());
+        try {
+            Task task = tasks.removeTask(index);
+            storage.save(tasks.getTasks());
+            return formatter.getTaskDeletedMessage(task, tasks.getSize());
+        } catch (IndexOutOfBoundsException e) {
+            return "You do not have a task with the number you provided!";
+        }
     }
 
     private static String findTask(String keyword, TaskList tasks, ResponseFormatter formatter) {
         return formatter.getMatchingTasksMessage(keyword, tasks);
+    }
+
+    private static Deadline createDeadline(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            throw new OrionException("You must provide a description and deadline!");
+        }
+        String[] deadlineParts = arguments.split(" /by ");
+        if (deadlineParts.length == 1) {
+            throw new OrionException("You must provide the deadline of the task in this format:\n"
+                    + "\"deadline (description) /by (date)\"");
+        }
+        return new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1]));
+    }
+
+    private static Event createEvent(String arguments) {
+        if (arguments == null || arguments.isBlank()) {
+            throw new OrionException("You must provide a description and start/end!");
+        }
+        String[] eventParts = arguments.split(" /from ");
+        if (eventParts.length == 1) {
+            throw new OrionException("You must specify the details of the event in this format:\n"
+                    + "\"event (description) /from (date) /to (date)\"");
+        }
+        String[] timeParts = eventParts[1].split(" /to ");
+        if (timeParts.length == 1) {
+            throw new OrionException("You must specify the details of the event in this format:\n"
+                    + "\"event (description) /from (date) /to (date)\"");
+        }
+        String description = eventParts[0];
+        LocalDateTime startTime = parseDateTime(timeParts[0]);
+        LocalDateTime endTime = parseDateTime(timeParts[1]);
+        return new Event(description, startTime, endTime);
     }
 
     private static LocalDateTime parseDateTime(String input) {
@@ -142,12 +173,12 @@ public class Parser {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd"),
                 DateTimeFormatter.ofPattern("dd/MM/yyyy"),
         };
-        for (DateTimeFormatter formatter : formatters) {
+        for (DateTimeFormatter pattern : formatters) {
             try {
-                return LocalDateTime.parse(input, formatter);
+                return LocalDateTime.parse(input, pattern);
             } catch (DateTimeParseException e) {
                 try {
-                    return LocalDate.parse(input, formatter).atStartOfDay();
+                    return LocalDate.parse(input, pattern).atStartOfDay();
                 } catch (DateTimeParseException ex) {
                     // Input did not match the formatter's pattern, ignore the exception and continue with the next one
                 }
