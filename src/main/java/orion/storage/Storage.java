@@ -23,6 +23,7 @@ public class Storage {
     private String filePath;
 
     public Storage(String filePath) {
+        assert filePath != null && !filePath.trim().isEmpty() : "Storage file path should not be null or empty";
         this.filePath = filePath;
     }
 
