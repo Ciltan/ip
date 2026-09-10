@@ -22,6 +22,11 @@ import orion.task.Todo;
 public class Storage {
     private String filePath;
 
+    /**
+     * Initializes a Storage object with the specified file path.
+     *
+     * @param filePath The path of the file to save and load tasks from.
+     */
     public Storage(String filePath) {
         assert filePath != null && !filePath.trim().isEmpty() : "Storage file path should not be null or empty";
         this.filePath = filePath;

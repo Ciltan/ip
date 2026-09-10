@@ -28,6 +28,16 @@ public class TaskList {
     }
 
     /**
+     * Inserts a task into the task list at the specified index.
+     *
+     * @param index The zero-based index where the task should be inserted.
+     * @param task The task to insert.
+     */
+    public void insertTask(int index, Task task) {
+        tasks.add(index, task);
+    }
+
+    /**
      * Removes a task from the task list at the specified index.
      *
      * @param index The zero-based index of the task to be removed.
