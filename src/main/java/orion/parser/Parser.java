@@ -18,6 +18,9 @@ import orion.task.Todo;
  * Handles the parsing of user input and execution of commands.
  */
 public class Parser {
+    private static String lastCommandGroup = null;
+    private static int lastTaskIndex = -1;
+    private static Task lastDeletedTask = null;
 
     /**
      * Parses the user input and executes the corresponding command.
@@ -75,6 +78,9 @@ public class Parser {
                     }
                     return findTask(arguments, tasks, formatter);
 
+                case UNDO:
+                    return undoLastCommand(tasks, storage);
+
                 default:
                     throw new OrionException("That is not a valid command!");
             }
@@ -107,6 +113,7 @@ public class Parser {
         assert task != null : "Task being added should not be null";
         tasks.addTask(task);
         storage.save(tasks.getTasks());
+        lastCommandGroup = "ADD";
         return formatter.getTaskAddedMessage(task, tasks.getSize());
     }
 
@@ -117,6 +124,8 @@ public class Parser {
             Task task = tasks.getTask(index);
             task.setDone(isDone);
             storage.save(tasks.getTasks());
+            lastCommandGroup = isDone ? "MARK" : "UNMARK";
+            lastTaskIndex = index;
             return formatter.getTaskMarkedMessage(task, isDone);
         } catch (IndexOutOfBoundsException e) {
             return "You do not have a task with the number you provided!";
@@ -128,6 +137,9 @@ public class Parser {
         try {
             Task task = tasks.removeTask(index);
             storage.save(tasks.getTasks());
+            lastCommandGroup = "DELETE";
+            lastTaskIndex = index;
+            lastDeletedTask = task;
             return formatter.getTaskDeletedMessage(task, tasks.getSize());
         } catch (IndexOutOfBoundsException e) {
             return "You do not have a task with the number you provided!";
@@ -136,6 +148,41 @@ public class Parser {
 
     private static String findTask(String keyword, TaskList tasks, ResponseFormatter formatter) {
         return formatter.getMatchingTasksMessage(keyword, tasks);
+    }
+
+    private static String undoLastCommand(TaskList tasks, Storage storage) {
+        if (lastCommandGroup == null) {
+            throw new OrionException("There is no previous command to undo!");
+        }
+        String response;
+        switch (lastCommandGroup) {
+            case "ADD":
+                tasks.removeTask(tasks.getSize() - 1);
+                response = "Undo successful! I've removed the task you just added.";
+                break;
+
+            case "DELETE":
+                tasks.insertTask(lastTaskIndex, lastDeletedTask);
+                response = "Undo successful! I've restored the deleted task.";
+                break;
+
+            case "MARK":
+                tasks.getTask(lastTaskIndex).setDone(false);
+                response = "Undo successful! I've unmarked the task.";
+                break;
+
+            case "UNMARK":
+                tasks.getTask(lastTaskIndex).setDone(true);
+                response = "Undo successful! I've marked the task as done again.";
+                break;
+
+            default:
+                lastCommandGroup = null;
+                throw new OrionException("Unknown previous command state. Cannot undo!");
+        }
+        storage.save(tasks.getTasks());
+        lastCommandGroup = null;
+        return response;
     }
 
     private static Deadline createDeadline(String arguments) {
