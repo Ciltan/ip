@@ -11,6 +11,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import orion.Orion;
+import orion.exception.OrionException;
 import orion.parser.Parser;
 
 /**
@@ -55,11 +56,14 @@ public class MainWindow extends AnchorPane {
         if (input.trim().isEmpty()) {
             return;
         }
-        String response = orion.getResponse(input);
-        dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getOrionDialog(response, orionImage)
-        );
+        DialogBox userDialog = DialogBox.getUserDialog(input, userImage);
+        DialogBox orionDialog;
+        try {
+            orionDialog = DialogBox.getOrionDialog(orion.getResponse(input), orionImage);
+        } catch (OrionException e) {
+            orionDialog = DialogBox.getOrionErrorDialog(e.getMessage(), orionImage);
+        }
+        dialogContainer.getChildren().addAll(userDialog, orionDialog);
         userInput.clear();
 
         if (Parser.isExit(input)) {

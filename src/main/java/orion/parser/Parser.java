@@ -30,8 +30,10 @@ public class Parser {
      * @param formatter ResponseFormatter object to handle text formatting.
      * @param storage Storage object to handle saving data.
      * @return The formatted response string to display to the user.
+     * @throws OrionException If the command is unrecognized, formatted incorrectly, or execution fails.
      */
-    public static String parseAndExecute(String input, TaskList tasks, ResponseFormatter formatter, Storage storage) {
+    public static String parseAndExecute(String input, TaskList tasks, ResponseFormatter formatter, Storage storage)
+            throws OrionException {
         assert input != null : "Command input string should not be null";
         try {
             String[] parts = input.split(" ", 2);
@@ -84,10 +86,8 @@ public class Parser {
                 default:
                     throw new OrionException("That is not a valid command!");
             }
-        } catch (OrionException e) {
-            return e.getMessage();
         } catch (NumberFormatException e) {
-            return "Could not parse the task number you provided!";
+            throw new OrionException("Could not parse the task number you provided!");
         }
     }
 
@@ -128,7 +128,7 @@ public class Parser {
             lastTaskIndex = index;
             return formatter.getTaskMarkedMessage(task, isDone);
         } catch (IndexOutOfBoundsException e) {
-            return "You do not have a task with the number you provided!";
+            throw new OrionException("You do not have a task with the number you provided!");
         }
     }
 
@@ -142,7 +142,7 @@ public class Parser {
             lastDeletedTask = task;
             return formatter.getTaskDeletedMessage(task, tasks.getSize());
         } catch (IndexOutOfBoundsException e) {
-            return "You do not have a task with the number you provided!";
+            throw new OrionException("You do not have a task with the number you provided!");
         }
     }
 

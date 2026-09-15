@@ -78,8 +78,9 @@ public class Orion {
      *
      * @param input The user's input text.
      * @return A string representing Orion's response.
+     * @throws OrionException If the user input is invalid or an error occurs during execution.
      */
-    public String getResponse(String input) {
+    public String getResponse(String input) throws OrionException {
         return Parser.parseAndExecute(input, tasks, formatter, storage);
     }
 
