@@ -7,12 +7,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Polygon;
 
 /**
  * Represents a dialog box consisting of an {@code ImageView} to represent the speaker's profile picture
@@ -58,7 +61,17 @@ public class DialogBox extends HBox {
      * @return A {@code DialogBox} containing the user's text and image.
      */
     public static DialogBox getUserDialog(String text, Image image) {
-        return new DialogBox(text, image);
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.dialog.getStyleClass().add("user-bubble");
+        Polygon tail = new Polygon(
+                0.0, 0.0,
+                15.0, 0.0,
+                0.0, 15.0
+        );
+        tail.setFill(Color.web("#1D82F5"));
+        dialogBox.getChildren().add(1, tail);
+        HBox.setMargin(tail, new Insets(0, 0, 0, -15));
+        return dialogBox;
     }
 
     /**
@@ -71,6 +84,37 @@ public class DialogBox extends HBox {
     public static DialogBox getOrionDialog(String text, Image image) {
         DialogBox dialogBox = new DialogBox(text, image);
         dialogBox.flip();
+        dialogBox.dialog.getStyleClass().add("orion-bubble");
+        Polygon tail = new Polygon(
+                15.0, 0.0,
+                0.0, 0.0,
+                15.0, 15.0
+        );
+        tail.setFill(Color.web("#E5E5EA"));
+        dialogBox.getChildren().add(1, tail);
+        HBox.setMargin(tail, new Insets(0, -15, 0, 0));
+        return dialogBox;
+    }
+
+    /**
+     * Creates a dialog box for Orion's error message.
+     *
+     * @param text The error message to be displayed.
+     * @param image Orion's display picture.
+     * @return A {@code DialogBox} containing the error text and image, flipped to the left.
+     */
+    public static DialogBox getOrionErrorDialog(String text, Image image) {
+        DialogBox dialogBox = new DialogBox(text, image);
+        dialogBox.flip();
+        dialogBox.dialog.getStyleClass().add("orion-error-bubble");
+        Polygon tail = new Polygon(
+                15.0, 0.0,
+                0.0, 0.0,
+                15.0, 15.0
+        );
+        tail.setFill(Color.web("#E5E5EA"));
+        dialogBox.getChildren().add(1, tail);
+        HBox.setMargin(tail, new Insets(0, -15, 0, 0));
         return dialogBox;
     }
 }
