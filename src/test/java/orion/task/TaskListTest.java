@@ -19,4 +19,13 @@ class TaskListTest {
         TaskList taskList = new TaskList();
         assertThrows(IndexOutOfBoundsException.class, () -> taskList.removeTask(0));
     }
+
+    @Test
+    public void findTasks_existingKeyword_success() {
+        TaskList taskList = new TaskList();
+        taskList.addTask(new Todo("read book"));
+        taskList.addTask(new Todo("return book"));
+        taskList.addTask(new Todo("do homework"));
+        assertEquals(2, taskList.findTasks("book").size());
+    }
 }

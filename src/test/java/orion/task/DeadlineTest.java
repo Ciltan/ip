@@ -17,7 +17,7 @@ class DeadlineTest {
     @Test
     public void toFileFormat_completedDeadline_success() {
         LocalDateTime date = LocalDateTime.of(2026, 8, 26, 10, 0);
-        Deadline deadline = new Deadline("submit assignment", date, true); // isDone is true
+        Deadline deadline = new Deadline("submit assignment", date, true);
         assertEquals("D | 1 | submit assignment | 2026-08-26 1000", deadline.toFileFormat());
     }
 }
