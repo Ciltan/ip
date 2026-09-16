@@ -41,7 +41,7 @@ public class Parser {
             try {
                 command = Command.valueOf(parts[0].toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new OrionException("That is not a valid command!");
+                throw new OrionException("That is not a valid command! Type 'help' to see all available commands.");
             }
 
             String arguments = parts.length == 2 ? parts[1] : null;
@@ -83,8 +83,11 @@ public class Parser {
                 case UNDO:
                     return undoLastCommand(tasks, storage);
 
+                case HELP:
+                    return formatter.getHelpMessage();
+
                 default:
-                    throw new OrionException("That is not a valid command!");
+                    throw new OrionException("That is not a valid command! Type 'help' to see all available commands.");
             }
         } catch (NumberFormatException e) {
             throw new OrionException("Could not parse the task number you provided!");
@@ -193,6 +196,8 @@ public class Parser {
         if (deadlineParts.length == 1) {
             throw new OrionException("You must provide the deadline of the task in this format:\n"
                     + "\"deadline (description) /by (date)\"");
+        } else if (deadlineParts.length > 2) {
+            throw new OrionException("You must provide only one deadline for the task!");
         }
         return new Deadline(deadlineParts[0], parseDateTime(deadlineParts[1]));
     }
@@ -205,15 +210,22 @@ public class Parser {
         if (eventParts.length == 1) {
             throw new OrionException("You must specify the details of the event in this format:\n"
                     + "\"event (description) /from (date) /to (date)\"");
+        } else if (eventParts.length > 2) {
+            throw new OrionException("You must provide only one start date and one end date for the event!");
         }
         String[] timeParts = eventParts[1].split(" /to ");
         if (timeParts.length == 1) {
             throw new OrionException("You must specify the details of the event in this format:\n"
                     + "\"event (description) /from (date) /to (date)\"");
+        } else if (timeParts.length > 2) {
+            throw new OrionException("You must provide only one start date and one end date for the event!");
         }
         String description = eventParts[0];
         LocalDateTime startTime = parseDateTime(timeParts[0]);
         LocalDateTime endTime = parseDateTime(timeParts[1]);
+        if (!startTime.isBefore(endTime)) {
+            throw new OrionException("The event's start date must be before its end date!");
+        }
         return new Event(description, startTime, endTime);
     }
 

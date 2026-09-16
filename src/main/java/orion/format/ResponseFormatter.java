@@ -102,6 +102,21 @@ public class ResponseFormatter {
         return sb.toString().trim();
     }
 
+    public String getHelpMessage() {
+        return "Here are the commands you can use:\n"
+                + "• todo (desc) - Add a Todo task\n"
+                + "• deadline (desc) /by (date) - Add a Deadline task\n"
+                + "• event (desc) /from (date) /to (date) - Add an Event task\n"
+                + "• list - List all your tasks\n"
+                + "• mark (number) - Set task as completed\n"
+                + "• unmark (number) - Set task as uncompleted\n"
+                + "• delete (number) - Remove a task\n"
+                + "• find (keyword) - Search for tasks with the keyword\n"
+                + "• undo - Reverts your last action\n"
+                + "• help - Shows this list\n"
+                + "• bye - Exit the application";
+    }
+
     private String formatLines(String... lines) {
         return String.join("\n", lines);
     }
