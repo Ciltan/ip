@@ -13,5 +13,6 @@ public enum Command {
     EVENT,
     DELETE,
     FIND,
-    UNDO
+    UNDO,
+    HELP
 }
