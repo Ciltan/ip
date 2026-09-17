@@ -105,6 +105,7 @@ Orion automatically saves all your data after every command. You do not need to 
 ---
 
 ## Command summary
+
 Action | Format | Examples
 -------|--------|---------
 **Add Todo** | `todo (description)` | `todo Clean room`
