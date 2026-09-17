@@ -45,6 +45,9 @@ public class Parser {
             }
 
             String arguments = parts.length == 2 ? parts[1] : null;
+            if (arguments != null && arguments.contains("|")) {
+                throw new OrionException("'|' is a special system character and cannot be used in command arguments!");
+            }
 
             switch (command) {
                 case LIST:
